@@ -1,8 +1,12 @@
+
 '''
 Created on Oct 15, 2012
 
 @author: mariaz
+
+This was the first attempt using tests to let a design emerge
 '''
+
 import unittest
 
 
@@ -21,24 +25,25 @@ class Board(object):
     def evolve(self):
         clusters = self.buildClusters()
         self.cells = [self.futureCell(cluster) for cluster in clusters]
-        return self.cells
     
     def futureCell(self, currentCells):
-        transform = [0, 0, 0, 1, 1, 0, 0, 0]
-        cellState = int(''.join([str(d) for d in currentCells]),2)
-        return transform[cellState]
+        rule24 = [0, 0, 0, 1, 1, 0, 0, 0]
+        ruleIndex = int(''.join([str(d) for d in currentCells]), 2) # 101 -> 5
+        return rule24[ruleIndex]
     
     
 class Test(unittest.TestCase):
 
     def testFirstGeneration(self):
         board = Board([1,0,0])
-        self.assertEquals(board.evolve(), [0,1,0])
+        board.evolve()
+        self.assertEquals(board.cells, [0,1,0])
 
     def testSecondGeneration(self):
         board = Board([1,0,0])
         board.evolve()
-        self.assertEquals(board.evolve(), [0,0,1])
+        board.evolve()
+        self.assertEquals(board.cells, [0,0,1])
 
     def testSingleCellEvolveToDead(self):
         board = Board([])
@@ -48,6 +53,11 @@ class Test(unittest.TestCase):
         board = Board([])
         self.assertEqual(board.futureCell([1,0,0]), 1)
     
+    '''
+    These tests emerged as the 'simple' evolve mechanism proved not simple enough and smaller chunks needed to be broken out and tested
+    They are not behaviour driven - more implementation specific and did not carry easily into different implementation
+    '''
+        
     def testClusterGeneration(self):
         board = Board([1,0,0])
         self.assertEquals(board.buildClusters(), [[0, 1, 0], [1, 0, 0], [0, 0, 1]])
@@ -58,7 +68,8 @@ class Test(unittest.TestCase):
         
     def testBigBuffer(self):
         board = Board([1,0,0,1,0,0])
-        self.assertEqual(board.evolve(),[0, 1, 0, 0, 1, 0])
+        board.evolve()
+        self.assertEqual(board.cells, [0, 1, 0, 0, 1, 0])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testFirstGeneration']

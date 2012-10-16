@@ -2,6 +2,9 @@
 Created on Oct 15, 2012
 
 @author: mariaz
+
+This is the result of trying to shoe-horn OO type design into solving this problem
+Didn't really like the result. Tests are ugly!! And while the code itself isn't too bad - it's longer and less pythonic.
 '''
 import unittest
 
@@ -12,12 +15,10 @@ class Board(object):
         self.cells = [Cell(v) for v in cellValues]
         count = len(self.cells)
 
-        self.cells[0].left = self.cells[-1]
-        self.cells[-1].right = self.cells[0]
-
-        for i in range(count - 1):
-            self.cells[i+1].left = self.cells[i]
-            self.cells[i].right = self.cells[i+1]
+        # using python trick of list[-1] is last element ... hence creating a circular buffer
+        for i in range(count):
+            self.cells[i].left = self.cells[i - 1]
+            self.cells[i-1].right = self.cells[i]
     
     def getCell(self, index):
         return self.cells[index]
@@ -36,7 +37,6 @@ class Cell(object):
         self.value = value
         self.left = None
         self.right = None
-
     
     def state(self):
         return [self.left.value, self.value, self.right.value]
@@ -108,21 +108,14 @@ class Test(unittest.TestCase):
         board = Board([1,1,1])
         self.assertEqual(board.getCell(1).futureValue(), 0)
 
-#    def testSingleCellEvolveToLive(self):
-#        board = Board([])
-#        self.assertEqual(board.futureCell([1,0,0]), 1)
-#    
-#    def testClusterGeneration(self):
-#        board = Board([1,0,0])
-#        self.assertEquals(board.buildClusters(), [[0, 1, 0], [1, 0, 0], [0, 0, 1]])
-#    
-#    def testRingBuffer(self):
-#        board = Board([1,0,0])
-#        self.assertEqual(board.ringBuffer(), [0,1,0,0,1])
-#        
-#    def testBigBuffer(self):
-#        board = Board([1,0,0,1,0,0])
-#        self.assertEqual(board.evolve(),[0, 1, 0, 0, 1, 0])
+    def testSingleCellEvolveToLive(self):
+        board = Board([1,0,0])
+        self.assertEqual(board.getCell(1).futureValue(), 1)
+
+    def testBigBuffer(self):
+        board = Board([1,0,0,1,0,0])
+        board.evolve()
+        self.assertEqual(board.state(), [0, 1, 0, 0, 1, 0])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testFirstGeneration']
